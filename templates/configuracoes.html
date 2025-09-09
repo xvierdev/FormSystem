@@ -29,4 +29,26 @@
         </div>
         <button type="submit">Salvar Alterações</button>
     </form>
+
+    <!-- ====================================================== -->
+    <!-- ========= INÍCIO DA SEÇÃO ADICIONADA ================= -->
+    <!-- ====================================================== -->
+    <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px; text-align: center;">
+        <h2>Acesso para Alunos</h2>
+        <p>
+            Peça para os alunos escanearem o QR Code abaixo para acessar a página inicial do questionário.
+            <br>
+            Eles precisam estar conectados na mesma rede Wi-Fi que o servidor.
+        </p>
+        
+        {% if qr_code_image %}
+            <img src="data:image/png;base64,{{ qr_code_image }}" alt="QR Code de Acesso" style="width: 250px; height: 250px; margin-top: 15px;">
+        {% else %}
+            <p class="error">Não foi possível gerar o QR Code.</p>
+        {% endif %}
+    </div>
+    <!-- ====================================================== -->
+    <!-- ============ FIM DA SEÇÃO ADICIONADA ================= -->
+    <!-- ====================================================== -->
+
 {% endblock %}
