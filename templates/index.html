@@ -4,11 +4,29 @@
 
 {% block content %}
     <h1>Bem-vindo ao Questionário!</h1>
+
+    <!-- ============================================= -->
+    <!-- ========= INÍCIO DA SEÇÃO DO QR CODE ======== -->
+    <!-- ============================================= -->
+    <div style="text-align: center; margin-bottom: 30px;">
+        <p>Use a câmera para escanear o código abaixo e acessar em seu dispositivo.</p>
+        
+        {% if qr_code_image %}
+            <img src="data:image/png;base64,{{ qr_code_image }}" alt="QR Code de Acesso" style="width: 200px; height: 200px; margin-top: 10px;">
+        {% else %}
+            <p class="error">Não foi possível gerar o QR Code de acesso.</p>
+        {% endif %}
+    </div>
+    <!-- ============================================= -->
+    <!-- ========== FIM DA SEÇÃO DO QR CODE ========== -->
+    <!-- ============================================= -->
+
     {% if error %}
         <p class="error">{{ error }}</p>
     {% endif %}
+
     <form action="{{ url_for('iniciar_questionario') }}" method="POST">
-        <label for="nome_aluno">Digite seu nome:</label>
+        <label for="nome_aluno">Ou digite seu nome aqui:</label>
         <input type="text" id="nome_aluno" name="nome_aluno" required>
         <button type="submit">Iniciar Questionário</button>
     </form>
