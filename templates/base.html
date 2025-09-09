@@ -1,35 +1,54 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Questionário{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {% block head %}{% endblock %}
-</head>
+{% block title %}Configurações{% endblock %}
 
-<body>
-    <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="nav-brand">Início</a>
-        <div class="nav-links">
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('relatorio') }}">Relatório</a>
-            <a href="{{ url_for('estatisticas') }}">Estatísticas</a> <!-- NOVO LINK -->
-            <a href="{{ url_for('upload_csv') }}">Upload</a>
-            <a href="{{ url_for('configuracoes') }}">Configurações</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-            {% else %}
-            <a href="{{ url_for('login') }}">Admin Login</a>
-            {% endif %}
+{% block content %}
+    <h1>Configurações do Administrador</h1>
+    <p>Altere seu nome de usuário e senha. Deixe os campos de senha em branco para não alterá-la.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('configuracoes') }}" method="POST" class="login-form">
+        <!-- ... SEUS CAMPOS DE FORMULÁRIO EXISTENTES AQUI ... -->
+        <div class="form-group">
+            <label for="username">Novo Nome de Usuário</label>
+            <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
         </div>
-    </nav>
-    <main class="main-content">
-        <div class="container">
-            {% block content %}{% endblock %}
+        <div class="form-group">
+            <label for="password">Nova Senha</label>
+            <input type="password" id="password" name="password">
         </div>
-    </main>
-    {% block scripts %}{% endblock %}
-</body>
+        <div class="form-group">
+            <label for="confirm_password">Confirmar Nova Senha</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+        </div>
+        <button type="submit">Salvar Alterações</button>
+    </form>
 
-</html>
+    <!-- ====================================================== -->
+    <!-- ========= INÍCIO DO NOVO CÓDIGO PARA O QR CODE ========= -->
+    <!-- ====================================================== -->
+    <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px;">
+        <h2>Acesso para Alunos</h2>
+        <p>
+            Peça para os alunos escanearem o QR Code abaixo para acessar a página inicial do questionário.
+            Eles precisam estar conectados na mesma rede Wi-Fi.
+        </p>
+        
+        {% if qr_code_image %}
+            <img src="data:image/png;base64,{{ qr_code_image }}" alt="QR Code de Acesso" style="width: 250px; height: 250px; margin: 0 auto; display: block;">
+        {% else %}
+            <p class="error">Não foi possível gerar o QR Code.</p>
+        {% endif %}
+    </div>
+    <!-- ====================================================== -->
+    <!-- ========== FIM DO NOVO CÓDIGO PARA O QR CODE =========== -->
+    <!-- ====================================================== -->
+
+{% endblock %}
