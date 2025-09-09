@@ -1,26 +1,34 @@
-# Framework e Extensões
+# ==================================
+# Framework Principal e Extensões
+# ==================================
 Flask==3.1.2
 Flask-Login==0.6.3
 Flask-SQLAlchemy==3.1.1
 
+# ==================================
 # Banco de Dados
+# ==================================
 SQLAlchemy==2.0.43
 
-# Utilitários
+# ==================================
+# Utilitários e Manipulação de Dados
+# ==================================
 pytz==2025.2
-
-# Manipulação de Arquivos
 openpyxl==3.1.5
+et-xmlfile==1.1.0 # Dependência do openpyxl
 
-# QR Code e Imagens
+# ==================================
+# Geração de QR Code e Imagens
+# ==================================
 qrcode==7.4.2
 Pillow==10.4.0
 
-# Dependências do Flask e outros
+# ==================================
+# Dependências Internas do Flask e Outros
+# ==================================
 blinker==1.9.0
 click==8.2.1
 colorama==0.4.6
-et-xmlfile==1.1.0
 greenlet==3.0.3
 itsdangerous==2.2.0
 Jinja2==3.1.4
