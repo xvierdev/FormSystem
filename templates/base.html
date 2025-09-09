@@ -15,7 +15,8 @@
         <div class="nav-links">
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('relatorio') }}">Relatório</a>
-            <a href="{{ url_for('estatisticas') }}">Estatísticas</a> <!-- NOVO LINK -->
+            <a href="{{ url_for('estatisticas') }}">Estatísticas</a>
+            <a href="{{ url_for('mostrar_qrcode') }}">Mostrar QR Code</a> <!-- <<< LINK ADICIONADO -->
             <a href="{{ url_for('upload_csv') }}">Upload</a>
             <a href="{{ url_for('configuracoes') }}">Configurações</a>
             <a href="{{ url_for('logout') }}">Logout</a>

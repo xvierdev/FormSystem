@@ -102,6 +102,7 @@ def load_user(user_id):
     return Admin.query.get(int(user_id))
 
 def carregar_questionario_do_csv(file_stream):
+    # ... (código inalterado)
     try:
         db.session.query(Alternativa).delete()
         db.session.query(Pergunta).delete()
@@ -134,6 +135,7 @@ def carregar_questionario_do_csv(file_stream):
         summary_logger.error(log_message)
         return False, f"Erro ao processar o arquivo: {e}"
 
+# ... (Rotas /login, /logout, /upload, /configuracoes permanecem inalteradas) ...
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated: return redirect(url_for('relatorio'))
@@ -174,9 +176,6 @@ def upload_csv():
             flash('Por favor, envie um arquivo .csv válido.', 'error')
     return render_template('upload.html')
 
-# =============================================================================
-# ROTA MODIFICADA: /configuracoes (lógica do QR Code removida)
-# =============================================================================
 @app.route('/configuracoes', methods=['GET', 'POST'])
 @login_required
 def configuracoes():
@@ -202,49 +201,45 @@ def configuracoes():
             flash('Nome de usuário atualizado com sucesso.', 'success')
         db.session.commit()
         return redirect(url_for('configuracoes'))
-    
-    # A rota agora simplesmente renderiza o HTML sem a variável do QR code
     return render_template('configuracoes.html')
 
 # =============================================================================
-# ROTA MODIFICADA: / (index) (lógica do QR Code adicionada aqui)
+# NOVA ROTA PARA EXIBIR O QR CODE DE FORMA DEDICADA
 # =============================================================================
-@app.route('/')
-def index():
-    session.clear()
-
-    # Gera o QR Code para a página inicial
+@app.route('/mostrar_qrcode')
+@login_required
+def mostrar_qrcode():
     local_ip = get_local_ip()
     server_url = f"http://{local_ip}:5000"
-    
+
     qr_img = qrcode.make(server_url)
     buffer = io.BytesIO()
     qr_img.save(buffer)
     buffer.seek(0)
-    
+
     qr_code_image_b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    
-    # Renderiza a página passando a imagem do QR Code
-    return render_template('index.html', qr_code_image=qr_code_image_b64)
+    return render_template('mostrar_qrcode.html', qr_code_image=qr_code_image_b64)
+
+
+# =============================================================================
+# ROTAS REVERTIDAS AO ESTADO ORIGINAL
+# =============================================================================
+@app.route('/')
+def index():
+    session.clear()
+    return render_template('index.html')
 
 @app.route('/iniciar_questionario', methods=['POST'])
 def iniciar_questionario():
     nome_aluno = request.form.get('nome_aluno', '').strip()
     if not nome_aluno:
-        # Precisamos gerar o QR code aqui também para a página não quebrar em caso de erro
-        local_ip = get_local_ip()
-        server_url = f"http://{local_ip}:5000"
-        qr_img = qrcode.make(server_url)
-        buffer = io.BytesIO()
-        qr_img.save(buffer)
-        buffer.seek(0)
-        qr_code_image_b64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-        return render_template('index.html', error="Por favor, digite seu nome.", qr_code_image=qr_code_image_b64)
+        return render_template('index.html', error="Por favor, digite seu nome.")
 
     if Pergunta.query.count() == 0:
         return render_template('index.html', error="Nenhum questionário disponível no momento. Contate o administrador.")
     if Submissao.query.filter_by(nome_aluno=nome_aluno, concluida=True).first():
         return render_template('ja_submetido.html', nome_aluno=nome_aluno)
+    
     token = str(uuid.uuid4())
     nova_submissao = Submissao(token=token, nome_aluno=nome_aluno)
     db.session.add(nova_submissao)
@@ -252,6 +247,8 @@ def iniciar_questionario():
     session['submission_token'] = token
     return redirect(url_for('questionario'))
 
+
+# ... (O restante do arquivo, a partir da rota /questionario, permanece inalterado) ...
 @app.route('/questionario')
 def questionario():
     token = session.get('submission_token')
@@ -297,8 +294,7 @@ def submeter_questionario():
 @login_required
 def relatorio():
     submissoes = Submissao.query.filter_by(concluida=True).options(selectinload(Submissao.respostas).options(joinedload(RespostaAluno.pergunta).options(joinedload(Pergunta.resposta_correta)), joinedload(RespostaAluno.alternativa_escolhida))).order_by(Submissao.data_hora.desc()).all()
-    total_perguntas_atual = Pergunta.query.count()
-    return render_template('relatorio.html', submissoes=submissoes, total_perguntas_atual=total_perguntas_atual, SAO_PAULO_TZ=SAO_PAULO_TZ, utc=pytz.utc)
+    return render_template('relatorio.html', submissoes=submissoes, SAO_PAULO_TZ=SAO_PAULO_TZ, utc=pytz.utc)
 
 @app.route('/limpar_registros', methods=['POST'])
 @login_required
@@ -319,6 +315,7 @@ def limpar_registros():
 @app.route('/estatisticas')
 @login_required
 def estatisticas():
+    # ... (código inalterado) ...
     perguntas = Pergunta.query.options(selectinload(Pergunta.alternativas)).all()
     respostas = RespostaAluno.query.all()
     charts_data = {}
@@ -353,6 +350,7 @@ def estatisticas():
 def get_todas_submissoes():
     return Submissao.query.filter_by(concluida=True).options(selectinload(Submissao.respostas).options(joinedload(RespostaAluno.pergunta).options(joinedload(Pergunta.resposta_correta)), joinedload(RespostaAluno.alternativa_escolhida))).order_by(Submissao.data_hora.desc()).all()
 
+# ... (Rotas de exportação e if __name__ == '__main__' permanecem inalteradas)
 @app.route('/exportar/simplificado')
 @login_required
 def exportar_simplificado():
