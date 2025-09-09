@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório do Questionário{% endblock %}
+
+{% block content %}
+<div class="container relatorio">
+    <h1>Relatório de Respostas</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <p class="{{ category }}">{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="report-actions">
+        <div class="export-buttons">
+            <a href="{{ url_for('exportar_simplificado') }}" class="button-link export">Exportar Resumo (XLSX)</a>
+            <a href="{{ url_for('exportar_completo') }}" class="button-link export">Exportar Detalhado (XLSX)</a>
+        </div>
+        <!-- NOVO BOTÃO DE LIMPEZA -->
+        <form action="{{ url_for('limpar_registros') }}" method="POST"
+            onsubmit="return confirm('ATENÇÃO: Todos os registros de alunos serão permanentemente apagados. Deseja continuar?');">
+            <button type="submit" class="button-link clear-records">Limpar Todos os Registros</button>
+        </form>
+    </div>
+
+    {% if submissoes %}
+    <!-- ... (resto do código do relatório sem alterações) ... -->
+    {% for submissao in submissoes %}
+    <div class="aluno-relatorio-bloco">
+        <div class="aluno-header">
+            <div class="aluno-nome-data">
+                <span class="nome-aluno-relatorio">Aluno: {{ submissao.nome_aluno }}</span>
+                <span class="data-hora-submissao">
+                    Data/Hora: {{ submissao.data_hora.replace(tzinfo=utc).astimezone(SAO_PAULO_TZ).strftime('%d/%m/%Y
+                    %H:%M:%S') }}
+                </span>
+            </div>
+            {% set acertos = submissao.respostas|selectattr('correta')|list|length %}
+            <div class="score">
+                Nota: {{ acertos }} acertos de {{ submissao.respostas|length }} perguntas respondidas.
+            </div>
+        </div>
+        {% for resposta in submissao.respostas %}
+        <div class="pergunta-item">
+            <p class="pergunta-texto">{{ loop.index }}. {{ resposta.pergunta.texto }}</p>
+            <div class="info-block">
+                <p>
+                    Sua resposta:
+                    {% if resposta.alternativa_escolhida %}
+                    <span class="{{ 'resposta-correta' if resposta.correta else 'resposta-incorreta' }}">
+                        {{ resposta.alternativa_escolhida.texto }}
+                    </span>
+                    {% else %}
+                    <span class="resposta-incorreta">Não respondida</span>
+                    {% endif %}
+                </p>
+                {% if not resposta.correta %}
+                {% if resposta.pergunta.resposta_correta %}
+                <p>
+                    Resposta correta:
+                    <span class="resposta-correta">
+                        {{ resposta.pergunta.resposta_correta.texto }}
+                    </span>
+                </p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="text-align: center;">Nenhum relatório disponível ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

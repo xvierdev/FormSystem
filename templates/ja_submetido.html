@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Questionário Já Concluído{% endblock %}
+
+{% block content %}
+    <h1 class="alert">Atenção, {{ nome_aluno }}!</h1>
+    <p>Parece que o nome "<span class="highlight">{{ nome_aluno }}</span>" já submeteu o questionário.</p>
+    <p>Cada nome só pode enviar o questionário uma única vez.</p>
+    <a href="{{ url_for('index') }}" class="button-link inicio">Voltar ao Início</a>
+{% endblock %}

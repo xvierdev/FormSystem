@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Carregar Perguntas{% endblock %}
+
+{% block content %}
+    <h1>Carregar Novo Questionário</h1>
+    <p>Envie um arquivo CSV para substituir as perguntas atuais. As respostas dos alunos serão mantidas.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('upload_csv') }}" method="POST" enctype="multipart/form-data" class="login-form">
+        <div class="form-group">
+            <label for="csv_file">Arquivo CSV</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+        </div>
+        <button type="submit">Carregar Arquivo</button>
+    </form>
+{% endblock %}

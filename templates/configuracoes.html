@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações{% endblock %}
+
+{% block content %}
+    <h1>Configurações do Administrador</h1>
+    <p>Altere seu nome de usuário e senha. Deixe os campos de senha em branco para não alterá-la.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('configuracoes') }}" method="POST" class="login-form">
+        <div class="form-group">
+            <label for="username">Novo Nome de Usuário</label>
+            <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Nova Senha</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirmar Nova Senha</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+        </div>
+        <button type="submit">Salvar Alterações</button>
+    </form>
+{% endblock %}

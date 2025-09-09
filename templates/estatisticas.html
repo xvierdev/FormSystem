@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Estatísticas do Questionário{% endblock %}
+
+{% block head %}
+<!-- Adiciona a biblioteca Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container stats-container">
+    <h1>Estatísticas Gerais</h1>
+
+    {% if total_respostas > 0 %}
+    <!-- Resumo -->
+    <div class="stats-summary">
+        <div class="stats-summary-card">
+            <h3>Pergunta com Mais Acertos</h3>
+            {% if mais_acertos %}
+            <p>"{{ mais_acertos.texto }}"</p>
+            <span>Acertada {{ mais_acertos.contagem }} vez(es)</span>
+            {% else %}
+            <p>Nenhum acerto registrado.</p>
+            {% endif %}
+        </div>
+        <div class="stats-summary-card">
+            <h3>Pergunta com Mais Erros</h3>
+            {% if mais_erros %}
+            <p>"{{ mais_erros.texto }}"</p>
+            <span>Errada {{ mais_erros.contagem }} vez(es)</span>
+            {% else %}
+            <p>Nenhum erro registrado.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Gráficos por Pergunta -->
+    <div class="charts-section">
+        <h2>Respostas por Pergunta</h2>
+        {% for id, chart in charts.items() %}
+        <div class="chart-container">
+            <h3>{{ loop.index }}. {{ chart.texto }}</h3>
+            <canvas id="chart-{{ id }}"></canvas>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Ainda não há respostas para gerar estatísticas.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Passa os dados do Flask para o JavaScript de forma segura
+    const chartsData = {{ charts | tojson }};
+
+    // Gera um gráfico para cada pergunta
+    for (const questionId in chartsData) {
+        const chartInfo = chartsData[questionId];
+        const ctx = document.getElementById(`chart-${questionId}`).getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartInfo.labels,
+                datasets: [{
+                    label: 'Nº de Respostas',
+                    data: chartInfo.data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // Garante que o eixo Y mostre apenas números inteiros
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Esconde a legenda para um visual mais limpo
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

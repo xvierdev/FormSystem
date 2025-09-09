@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Questionário{% endblock %}
+
+{% block content %}
+    <div class="questionnaire-header">
+        <div class="aluno-info">
+            Olá, {{ nome_aluno }}!
+        </div>
+        <!-- Botão de Alternância de Tema -->
+        <button id="theme-toggle-btn" class="theme-toggle-button">Mudar Tema</button>
+    </div>
+
+    <h1>Questionário</h1>
+    
+    <form action="{{ url_for('submeter_questionario') }}" method="POST">
+        {% for pergunta in perguntas %}
+            <div class="question-block">
+                <h2>{{ loop.index }}. {{ pergunta.texto }}</h2>
+                {% for alternativa in pergunta.alternativas %}
+                    <div class="alternativa-item">
+                        <input type="radio" id="alt_{{ alternativa.id }}" name="pergunta_{{ pergunta.id }}" value="{{ alternativa.id }}" required>
+                        <label for="alt_{{ alternativa.id }}">{{ alternativa.texto }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="finalizar-btn">Finalizar Questionário</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // --- Script Anti-Cola (Existente) ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('selectstart', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'a', 'v'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+            }
+        });
+
+        // --- Script Modo Claro/Escuro ---
+        (function() {
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const body = document.body;
+
+            function applySavedTheme() {
+                const savedTheme = localStorage.getItem('quizTheme');
+                if (savedTheme === 'dark') {
+                    body.classList.add('dark-mode');
+                    themeToggleButton.textContent = "Modo Claro";
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeToggleButton.textContent = "Modo Escuro";
+                }
+            }
+
+            themeToggleButton.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('quizTheme', 'dark');
+                    themeToggleButton.textContent = "Modo Claro";
+                } else {
+                    localStorage.setItem('quizTheme', 'light');
+                    themeToggleButton.textContent = "Modo Escuro";
+                }
+            });
+
+            applySavedTheme();
+        })();
+    </script>
+{% endblock %}
